@@ -1,0 +1,24 @@
+# Local editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Local-only material (belongs beside the repo under NAVI_PROJECT/, not in git)
+local/
+references/
+*.pkg
+
+# Installer backups / generated runtime
+backups/
+*.log
+.cache/
+
+# Optional tooling
+node_modules/
+__pycache__/
+*.pyc
