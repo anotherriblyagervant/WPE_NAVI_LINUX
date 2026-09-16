@@ -1,0 +1,18 @@
+{
+    "KPackageStructure": "Plasma/Wallpaper",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "WPE_NAVI_LINUX contributors"
+            }
+        ],
+        "Description": "Copland OS / LAIN-inspired desktop scene (Stage 1)",
+        "Icon": "preferences-desktop-wallpaper",
+        "Id": "org.lainavi.copland.scene",
+        "License": "Apache-2.0",
+        "Name": "Copland LAIN Scene",
+        "Version": "0.1.0",
+        "Website": "https://github.com/anotherriblyagervant/WPE_NAVI_LINUX"
+    },
+    "X-KDE-ParentApp": "org.kde.plasmashell"
+}

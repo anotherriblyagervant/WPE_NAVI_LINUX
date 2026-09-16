@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Copland LAIN Scene</title>
+  <link rel="stylesheet" href="css/scene.css" />
+</head>
+<body>
+  <div id="viewport">
+    <div id="scene">
+      <section class="window win-camera">
+        <header class="titlebar"><span class="title">Camera 2</span><span class="xbtn">×</span></header>
+        <div class="body media"><img src="assets/images/camera2.gif" alt="" /></div>
+      </section>
+
+      <section class="window win-audio">
+        <header class="titlebar"><span class="title">AUDIO</span><span class="xbtn">×</span></header>
+        <div class="body audio-body"><span id="audioStatus">No audio playing.</span></div>
+      </section>
+
+      <section class="window win-calendar">
+        <header class="titlebar"><span class="title">CALENDAR</span><span class="xbtn">×</span></header>
+        <div class="body calendar-body">
+          <div class="cal-clock">
+            <span id="calH">00</span>
+            <span id="calM">00</span>
+            <span id="calS">00</span>
+          </div>
+          <div class="cal-month" id="calMonth">September</div>
+          <div class="cal-grid" id="calGrid" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <section class="window win-log">
+        <header class="titlebar"><span class="title">LOG</span><span class="xbtn">×</span></header>
+        <div class="body log-body">
+          <div class="log-head"><span>TIME</span><span>ID</span><span>TASK</span></div>
+          <div class="log-cols">
+            <pre id="logTime">12:00:01
+12:00:02
+12:00:03</pre>
+            <pre id="logId">338213
+287798
+971321</pre>
+            <pre id="logTask">Service Host: DNS Client
+System Setting Broker
+Service Host: DHCP Client</pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="window win-eyes">
+        <header class="titlebar"><span class="title">Copland OS Enterprise</span><span class="xbtn">×</span></header>
+        <div class="body media tint"><img src="assets/images/copland-logo.gif" alt="" /></div>
+      </section>
+
+      <section class="window win-numbers">
+        <header class="titlebar"><span class="title">NUMBERS</span><span class="xbtn">×</span></header>
+        <div class="body numbers-grid">
+          <pre id="num1">33058221
+93963211
+18402933</pre>
+          <pre id="num2">55201844
+70119220
+44887711</pre>
+          <pre id="num3">99100233
+12004567
+88334455</pre>
+        </div>
+      </section>
+
+      <section class="window win-words">
+        <header class="titlebar"><span class="title">WORDS</span><span class="xbtn">×</span></header>
+        <div class="body words-grid">
+          <pre id="words1">bookish
+giraffe
+athirst</pre>
+          <pre id="words2">bilious
+brittle
+luminous</pre>
+          <pre id="words3">circuit
+wired
+protocol</pre>
+          <pre id="words4">signal
+layer
+packet</pre>
+        </div>
+      </section>
+
+      <section class="window win-world">
+        <header class="titlebar"><span class="title">WORLD CLOCK</span><span class="xbtn">×</span></header>
+        <div class="body world-body">
+          <div class="city">
+            <div class="city-name" id="city1Name">TOKYO</div>
+            <div class="city-time" id="city1Time">00:00:00</div>
+            <div class="city-date" id="city1Date">01 September</div>
+          </div>
+          <div class="city">
+            <div class="city-name" id="city2Name">NYC</div>
+            <div class="city-time" id="city2Time">00:00:00</div>
+            <div class="city-date" id="city2Date">01 September</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="window win-smile">
+        <header class="titlebar"><span class="title">SMILE</span><span class="xbtn">×</span></header>
+        <div class="body media smile"><img src="assets/images/smile.gif" alt="" /></div>
+      </section>
+
+      <div class="scanlines" aria-hidden="true"></div>
+    </div>
+  </div>
+  <script src="js/scene.js"></script>
+</body>
+</html>

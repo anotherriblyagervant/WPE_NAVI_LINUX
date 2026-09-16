@@ -15,14 +15,18 @@ Later stages (not this repo’s job yet) can turn pieces into real apps and a fu
 
 ## Status
 
-Not installable yet. Heading toward a simple `./install.sh` / `./uninstall.sh`,
-tested on a separate Plasma user so your main desktop stays safe.
+Wallpaper package includes the static Copland layout plus LAIN art and pixel fonts.
+No installer yet — on the Plasma host:
+
+```bash
+kpackagetool6 --type Plasma/Wallpaper --upgrade \
+  packages/plasma/wallpapers/org.lainavi.copland.scene
+```
 
 ## Roadmap (simple → harder)
 
-- [ ] Project layout and installer skeleton
-- [ ] Wallpaper that shows the Copland window layout (static)
-- [ ] LAIN art and pixel fonts
+- [x] Wallpaper that shows the Copland window layout (static)
+- [x] LAIN art and pixel fonts
 - [ ] Live clock and calendar
 - [ ] World clocks (Tokyo / NYC)
 - [ ] Fake system log, words, and numbers
@@ -34,9 +38,8 @@ tested on a separate Plasma user so your main desktop stays safe.
 
 ## Credits
 
-Visual design and assets come from the Steam Workshop items linked above (Pixels by
-its author; LAIN Navi / LAIN GAV preset on top). A fuller credit list will live in
-`docs/CREDITS.md` once assets are vendored into the theme package.
+Visual design and assets come from the Steam Workshop items linked above (by Gav).
+Bundled files are listed in [`docs/CREDITS.md`](docs/CREDITS.md).
 
 ## License
 
