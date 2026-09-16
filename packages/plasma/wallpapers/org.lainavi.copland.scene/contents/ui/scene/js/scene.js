@@ -4,7 +4,6 @@
   const SCENE_W = 1920;
   const SCENE_H = 1080;
   const RESIZE_DEBOUNCE_MS = 100;
-  const TICK_MS = 250;
   const BOOT_SCALE_MAX_ATTEMPTS = 40;
   const MONTHS = [
     "January", "February", "March", "April", "May", "June",
@@ -22,22 +21,26 @@
   const elMonth = document.getElementById("calMonth");
   const elGrid = document.getElementById("calGrid");
 
-  // Live IANA zones (matches Pixels SoT better than fixed hour offsets).
+  // Live IANA zones (Pixels SoT). DESIGN.md listed fixed offsets for a sample locale.
   const worldClocks = [
     {
       timeZone: "Asia/Tokyo",
-      timeNode: document.getElementById("city1Time"),
+      hNode: document.getElementById("city1H"),
+      minNode: document.getElementById("city1Min"),
+      secNode: document.getElementById("city1Sec"),
       dayNode: document.getElementById("city1Day"),
       monthNode: document.getElementById("city1Month")
     },
     {
       timeZone: "America/New_York",
-      timeNode: document.getElementById("city2Time"),
+      hNode: document.getElementById("city2H"),
+      minNode: document.getElementById("city2Min"),
+      secNode: document.getElementById("city2Sec"),
       dayNode: document.getElementById("city2Day"),
       monthNode: document.getElementById("city2Month")
     }
   ].filter(function (c) {
-    return c.timeNode && c.dayNode && c.monthNode;
+    return c.hNode && c.minNode && c.secNode && c.dayNode && c.monthNode;
   });
 
   worldClocks.forEach(function (c) {
@@ -50,7 +53,9 @@
       day: "2-digit",
       month: "long"
     });
-    c.lastTime = "";
+    c.lastHour = "";
+    c.lastMin = "";
+    c.lastSec = "";
     c.lastDay = "";
     c.lastMonth = "";
   });
@@ -59,9 +64,9 @@
 
   let resizeTimer = 0;
   let bootScaleTimer = 0;
+  let tickTimer = 0;
   let lastCalendarKey = "";
   let lastScale = NaN;
-  let lastLocalSecond = -1;
 
   function scaleScene() {
     const w = window.innerWidth;
@@ -171,38 +176,60 @@
       const c = worldClocks[i];
       try {
         const bag = partsFromFormatter(c.fmt, now);
-        const timeText = bag.hour + ":" + bag.minute + ":" + bag.second;
-        if (timeText !== c.lastTime) {
-          c.lastTime = timeText;
-          c.timeNode.textContent = timeText;
+        if (!bag.hour || !bag.minute || !bag.second) continue;
+
+        if (bag.hour !== c.lastHour) {
+          c.lastHour = bag.hour;
+          c.hNode.textContent = bag.hour;
         }
-        if (bag.day !== c.lastDay) {
+        if (bag.minute !== c.lastMin) {
+          c.lastMin = bag.minute;
+          c.minNode.textContent = bag.minute;
+        }
+        if (bag.second !== c.lastSec) {
+          c.lastSec = bag.second;
+          c.secNode.textContent = bag.second;
+        }
+        if (bag.day && bag.day !== c.lastDay) {
           c.lastDay = bag.day;
           c.dayNode.textContent = bag.day;
         }
-        if (bag.month !== c.lastMonth) {
+        if (bag.month && bag.month !== c.lastMonth) {
           c.lastMonth = bag.month;
           c.monthNode.textContent = bag.month;
         }
       } catch (err) {
-        /* keep last values */
+        /* keep last values for this city */
       }
     }
   }
 
   function tick() {
+    const now = new Date();
     try {
-      const now = new Date();
-      const sec = now.getSeconds();
-      if (sec === lastLocalSecond) return;
-      lastLocalSecond = sec;
-
       updateClock(now);
+    } catch (err) {
+      /* keep wallpaper visible */
+    }
+    try {
       buildCalendar(now);
+    } catch (err) {
+      /* keep wallpaper visible */
+    }
+    try {
       updateWorldClocks(now);
     } catch (err) {
-      /* Keep wallpaper visible even if calendar update fails */
+      /* keep wallpaper visible */
     }
+  }
+
+  function scheduleNextTick() {
+    // Fire once per second near the boundary instead of polling 4×/s.
+    const delay = Math.max(32, 1000 - (Date.now() % 1000) + 8);
+    tickTimer = window.setTimeout(function () {
+      tick();
+      scheduleNextTick();
+    }, delay);
   }
 
   function bootScale() {
@@ -218,8 +245,8 @@
 
   bootScale();
   tick();
+  scheduleNextTick();
   window.addEventListener("resize", onResize);
-  window.setInterval(tick, TICK_MS);
 
   if (typeof ResizeObserver !== "undefined") {
     try {

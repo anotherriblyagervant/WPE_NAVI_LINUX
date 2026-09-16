@@ -297,47 +297,118 @@ body {
 }
 
 .world-body {
+  --world-pad-x: 20px;
+  --world-pad-bottom: 4px;
+  --city-name-size: 60px;
+  --city-time-size: 60px;
+  --city-date-size: 46px;
+  --city-date-gap: 12px;
+  --city-sep-width: 0.5em;
+
   display: grid;
   grid-template-columns: 1fr 1fr;
+  align-items: stretch;
   height: 100%;
-  padding: 18px 24px;
-  gap: 16px;
+  padding: 0 var(--world-pad-x) var(--world-pad-bottom);
+  gap: 0 8px;
+  box-sizing: border-box;
 }
 
+.city {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  overflow: visible;
+  gap: 0;
+}
+
+/* Vertical free space: top:bottom = 1:2 (content sits slightly high). */
+.city::before {
+  content: "";
+  flex: 1 1 0;
+}
+
+.city::after {
+  content: "";
+  flex: 2 2 0;
+}
+
+/* Pixeltype tall em-box — negative margins collapse optical row gaps. */
 .city-name {
   font-family: "Pixeltype", monospace;
-  font-size: 32px;
+  font-size: var(--city-name-size);
   font-weight: 400;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   color: var(--text-bright);
-  margin-bottom: 8px;
+  margin: 0 0 -0.32em;
+  line-height: 1;
 }
 
 .city-time {
   font-family: "Pixeltype", monospace;
-  font-size: 48px;
-  letter-spacing: 0.06em;
+  font-size: var(--city-time-size);
+  letter-spacing: 0;
+  white-space: nowrap;
+  line-height: 1;
+  margin: 0 0 -0.28em;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: max-content;
+  max-width: 100%;
+}
+
+.city-h {
   color: var(--base);
+  line-height: 1;
+}
+
+.city-m,
+.city-s {
+  color: var(--text-bright);
+  line-height: 1;
+}
+
+/* Fixed slot; ":" centered so left/right gaps match (ignore font side bearings). */
+.city-sep {
+  position: relative;
+  flex: 0 0 var(--city-sep-width);
+  width: var(--city-sep-width);
+  height: 0.85em;
+  color: var(--text-bright);
+}
+
+.city-sep::before {
+  content: ":";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -52%);
+  line-height: 1;
 }
 
 .city-date {
-  margin-top: 6px;
+  margin: 0;
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  align-items: flex-end;
+  gap: var(--city-date-gap);
+  line-height: 1;
+}
+
+.city-day,
+.city-month {
+  font-family: "FreePixel", monospace;
+  font-size: var(--city-date-size);
+  letter-spacing: 0.04em;
+  line-height: 1;
 }
 
 .city-day {
-  font-family: "Pixeltype", monospace;
-  font-size: 22px;
-  letter-spacing: 0.04em;
   color: var(--base);
 }
 
 .city-month {
-  font-family: "FreePixel", monospace;
-  font-size: 20px;
-  letter-spacing: 0.04em;
   color: var(--text-bright);
 }
 
