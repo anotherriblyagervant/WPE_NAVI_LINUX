@@ -1,34 +1,40 @@
-/*
- * Copland LAIN Scene — Plasma 6 wallpaper host
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import QtQuick
-import QtWebEngine
+import org.kde.plasma.plasmoid
 
 WallpaperItem {
     id: root
 
-    WebEngineView {
-        id: web
+    Rectangle {
         anchors.fill: parent
-        backgroundColor: "#040017"
-        url: Qt.resolvedUrl("scene/index.html")
-        settings.localContentCanAccessFileUrls: true
-        settings.localContentCanAccessRemoteUrls: false
-        settings.javascriptEnabled: true
-        settings.playbackRequiresUserGesture: false
+        color: "#040017"
+        z: 0
 
-        onLoadingChanged: function (loadRequest) {
-            if (loadRequest.status === WebEngineView.LoadSucceededStatus
-                    || loadRequest.status === WebEngineView.LoadFailedStatus) {
-                root.loading = false
+        Text {
+            id: statusText
+            anchors.centerIn: parent
+            color: "#0083bc"
+            text: "Copland LAIN Scene"
+            horizontalAlignment: Text.AlignHCenter
+            font.pixelSize: 24
+            visible: webLoader.status !== Loader.Ready
+        }
+    }
+
+    Loader {
+        id: webLoader
+        anchors.fill: parent
+        z: 1
+        asynchronous: false
+        source: Qt.resolvedUrl("WebEngineScene.qml")
+        onStatusChanged: {
+            if (status === Loader.Error) {
+                statusText.text = "Copland LAIN Scene\n(WebEngine failed to load)"
+                statusText.visible = true
             }
         }
     }
 
     Component.onCompleted: {
-        // Fallback if LoadSucceeded never fires
         root.loading = false
     }
 }

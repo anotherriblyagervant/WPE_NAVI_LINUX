@@ -15,8 +15,8 @@ Later stages (not this repo’s job yet) can turn pieces into real apps and a fu
 
 ## Status
 
-Wallpaper package includes the static Copland layout plus LAIN art and pixel fonts.
-No installer yet — on the Plasma host:
+Wallpaper package includes the Copland layout, LAIN art/fonts, and a live local
+clock + calendar. No installer yet — on the Plasma host:
 
 ```bash
 kpackagetool6 --type Plasma/Wallpaper --upgrade \
@@ -27,7 +27,7 @@ kpackagetool6 --type Plasma/Wallpaper --upgrade \
 
 - [x] Wallpaper that shows the Copland window layout (static)
 - [x] LAIN art and pixel fonts
-- [ ] Live clock and calendar
+- [x] Live clock and calendar
 - [ ] World clocks (Tokyo / NYC)
 - [ ] Fake system log, words, and numbers
 - [ ] Scaling for real resolution / multi-monitor

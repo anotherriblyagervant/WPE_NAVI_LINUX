@@ -17,6 +17,7 @@ references/
 backups/
 *.log
 .cache/
+.tmp_cmp/
 
 # Optional tooling
 node_modules/
