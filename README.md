@@ -17,8 +17,10 @@ Later stages (not this repo’s job yet) can turn pieces into real apps and a fu
 
 Wallpaper package includes the Copland layout, LAIN art/fonts, live local
 clock + calendar, world clocks (Tokyo / NYC), and cycling fake LOG / WORDS /
-NUMBERS. No installer script yet — manage the package on the Plasma host with
-`kpackagetool6` from the repo root:
+NUMBERS. The scene is authored at **1920×1080** and **letterboxes** to each
+screen’s wallpaper area (no crop); apply it on every monitor you want covered.
+Package version **1.1**. No installer script yet — manage the package on the
+Plasma host with `kpackagetool6` from the repo root:
 
 ```bash
 # Install (first time)
@@ -43,7 +45,7 @@ Then pick **Copland LAIN Scene** in *System Settings → Wallpaper* (per screen 
 - [x] Live clock and calendar
 - [x] World clocks (Tokyo / NYC)
 - [x] Fake system log, words, and numbers
-- [ ] Scaling for real resolution / multi-monitor
+- [x] Scaling for real resolution / multi-monitor
 - [ ] Matching Plasma colors, fonts, and panel chrome
 - [ ] Install and uninstall that won’t wreck your main desktop
 - [ ] Test-account workflow (`lain_test`)

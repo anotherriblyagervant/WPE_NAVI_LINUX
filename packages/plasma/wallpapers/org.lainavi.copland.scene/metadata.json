@@ -11,7 +11,7 @@
         "Id": "org.lainavi.copland.scene",
         "License": "Apache-2.0",
         "Name": "Copland LAIN Scene",
-        "Version": "0.1.0",
+        "Version": "1.1",
         "Website": "https://github.com/anotherriblyagervant/WPE_NAVI_LINUX"
     },
     "X-KDE-ParentApp": "org.kde.plasmashell"

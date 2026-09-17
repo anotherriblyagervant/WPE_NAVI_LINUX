@@ -4,6 +4,7 @@ import org.kde.plasma.plasmoid
 WallpaperItem {
     id: root
 
+    // Full-bleed letterbox bars while WebEngine boots / per-screen contain.
     Rectangle {
         anchors.fill: parent
         color: "#040017"

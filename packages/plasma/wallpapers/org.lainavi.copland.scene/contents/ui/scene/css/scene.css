@@ -20,6 +20,10 @@
 
   --scene-w: 1920px;
   --scene-h: 1080px;
+  /* Written by scene.js letterbox (contain). */
+  --scene-scale: 1;
+  --scene-ox: 0px;
+  --scene-oy: 0px;
 
   --col-left: 650px;
   --col-center: 656px;
@@ -89,21 +93,26 @@ body {
 }
 
 #viewport {
+  position: relative;
   width: 100%;
   height: 100%;
-  display: grid;
-  place-items: center;
+  overflow: hidden;
   background: var(--bg);
 }
 
 #scene {
+  position: absolute;
+  left: var(--scene-ox);
+  top: var(--scene-oy);
   width: var(--scene-w);
   height: var(--scene-h);
-  position: relative;
   background: var(--bg);
-  transform-origin: center center;
+  transform: scale(var(--scene-scale));
+  transform-origin: 0 0;
   -webkit-font-smoothing: none;
   font-smooth: never;
+  image-rendering: pixelated;
+  image-rendering: -webkit-optimize-contrast;
 }
 
 .window {
@@ -211,6 +220,8 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  image-rendering: pixelated;
+  image-rendering: -webkit-optimize-contrast;
 }
 
 /* Logo already cyan-ish; light blend only — avoids heavy per-frame filters */

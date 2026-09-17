@@ -1,10 +1,6 @@
 (() => {
   "use strict";
 
-  const SCENE_W = 1920;
-  const SCENE_H = 1080;
-  const RESIZE_DEBOUNCE_MS = 100;
-  const BOOT_SCALE_MAX_ATTEMPTS = 40;
   const LOG_ROWS = 21;
   const MONTHS = [
     "January", "February", "March", "April", "May", "June",
@@ -49,6 +45,55 @@
 
   const scene = document.getElementById("scene");
   if (!scene) return;
+
+  const scaleRoot = document.documentElement;
+  const SCENE_W = 1920;
+  const SCENE_H = 1080;
+  const RESIZE_DEBOUNCE_MS = 50;
+  let lastFitKey = "";
+  let fitTimer = 0;
+
+  function applyFit(w, h) {
+    w = Math.round(Number(w) || 0);
+    h = Math.round(Number(h) || 0);
+    if (w < 2 || h < 2) return false;
+
+    // Letterbox (contain): fit 1920×1080 inside the WebEngine widget without cropping.
+    const scale = Math.min(w / SCENE_W, h / SCENE_H);
+    const key = w + "x" + h + ":" + scale;
+    if (key === lastFitKey) return true;
+    lastFitKey = key;
+
+    const ox = Math.round((w - SCENE_W * scale) / 2);
+    const oy = Math.round((h - SCENE_H * scale) / 2);
+    scaleRoot.style.setProperty("--scene-scale", String(scale));
+    scaleRoot.style.setProperty("--scene-ox", ox + "px");
+    scaleRoot.style.setProperty("--scene-oy", oy + "px");
+    return true;
+  }
+
+  function fitFromWindow() {
+    let w = window.innerWidth;
+    let h = window.innerHeight;
+    if (window.visualViewport && window.visualViewport.width >= 2) {
+      w = Math.min(w, window.visualViewport.width);
+      h = Math.min(h, window.visualViewport.height);
+    }
+    if (document.documentElement.clientWidth >= 2) {
+      w = Math.min(w, document.documentElement.clientWidth);
+      h = Math.min(h, document.documentElement.clientHeight);
+    }
+    return applyFit(w, h);
+  }
+
+  function fitScene() {
+    fitFromWindow();
+  }
+
+  function onFitResize() {
+    window.clearTimeout(fitTimer);
+    fitTimer = window.setTimeout(fitScene, RESIZE_DEBOUNCE_MS);
+  }
 
   const elH = document.getElementById("calH");
   const elM = document.getElementById("calM");
@@ -170,46 +215,11 @@
   ];
   const wordPools = (typeof window !== "undefined" && window.COPLAND_WORDS) || null;
 
-  let resizeTimer = 0;
-  let bootScaleTimer = 0;
   let tickTimer = 0;
   let lastCalendarKey = "";
-  let lastScale = NaN;
   let lastCalH = "";
   let lastCalM = "";
   let lastCalS = "";
-
-  function scaleScene() {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    if (w < 2 || h < 2) return false;
-
-    let scale = Math.min(w / SCENE_W, h / SCENE_H);
-    if (Math.abs(scale - 1) < 0.015) {
-      scale = 1;
-    } else {
-      scale = Math.round(scale * 200) / 200;
-    }
-    if (scale !== lastScale) {
-      lastScale = scale;
-      scene.style.transform = "scale(" + scale + ")";
-    }
-    return true;
-  }
-
-  function stopBootScale() {
-    if (bootScaleTimer) {
-      window.clearInterval(bootScaleTimer);
-      bootScaleTimer = 0;
-    }
-  }
-
-  function onResize() {
-    window.clearTimeout(resizeTimer);
-    resizeTimer = window.setTimeout(function () {
-      if (scaleScene()) stopBootScale();
-    }, RESIZE_DEBOUNCE_MS);
-  }
 
   function updateClock(now) {
     if (!elH || !elM || !elS) return;
@@ -417,29 +427,12 @@
     }, delay);
   }
 
-  function bootScale() {
-    if (scaleScene()) return;
-    let attempts = 0;
-    bootScaleTimer = window.setInterval(function () {
-      attempts += 1;
-      if (scaleScene() || attempts > BOOT_SCALE_MAX_ATTEMPTS) {
-        stopBootScale();
-      }
-    }, 50);
-  }
-
   initNumColumns();
-  bootScale();
+  fitScene();
+  window.addEventListener("resize", onFitResize);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", onFitResize);
+  }
   tick();
   scheduleNextTick();
-  window.addEventListener("resize", onResize);
-
-  if (typeof ResizeObserver !== "undefined") {
-    try {
-      const ro = new ResizeObserver(onResize);
-      ro.observe(document.documentElement);
-    } catch (err) {
-      /* ignore */
-    }
-  }
 })();
