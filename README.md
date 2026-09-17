@@ -17,13 +17,24 @@ Later stages (not this repo’s job yet) can turn pieces into real apps and a fu
 
 Wallpaper package includes the Copland layout, LAIN art/fonts, live local
 clock + calendar, world clocks (Tokyo / NYC), and cycling fake LOG / WORDS /
-NUMBERS. No installer yet — on the
-Plasma host:
+NUMBERS. No installer script yet — manage the package on the Plasma host with
+`kpackagetool6` from the repo root:
 
 ```bash
+# Install (first time)
+kpackagetool6 --type Plasma/Wallpaper --install \
+  packages/plasma/wallpapers/org.lainavi.copland.scene
+
+# Update (already installed)
 kpackagetool6 --type Plasma/Wallpaper --upgrade \
   packages/plasma/wallpapers/org.lainavi.copland.scene
+
+# Remove
+kpackagetool6 --type Plasma/Wallpaper --remove \
+  org.lainavi.copland.scene
 ```
+
+Then pick **Copland LAIN Scene** in *System Settings → Wallpaper* (per screen if you use more than one). After CSS/JS-only tweaks, reselect the wallpaper if Plasma still shows a cached scene.
 
 ## Roadmap (simple → harder)
 
