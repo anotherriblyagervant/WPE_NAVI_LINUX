@@ -1,0 +1,19 @@
+{
+    "KPackageStructure": "Plasma/Theme",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "WPE_NAVI_LINUX contributors"
+            }
+        ],
+        "Category": "",
+        "Description": "Copland / LAIN Plasma style — dark navy panel and widget chrome matching the wallpaper scene",
+        "EnabledByDefault": false,
+        "Id": "org.lainavi.copland",
+        "License": "Apache-2.0",
+        "Name": "Copland LAIN",
+        "Version": "1.2",
+        "Website": "https://github.com/anotherriblyagervant/WPE_NAVI_LINUX"
+    },
+    "X-Plasma-API": "5.0"
+}
