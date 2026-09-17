@@ -47,16 +47,21 @@
   --numbers-h: 280px;
 
   --text-bright: #e8f6ff;
+  --win-bg: #040017; /* LAIN preset backgroundcolour — not pure black */
 
   /* Calendar panel (contents/ui absolute layout; 614x260 body) */
-  --cal-clock-x: 52px;
-  --cal-mid-x: 200px;
+  --cal-clock-x: 26px;
+  --cal-mid-gap: 28px; /* space between month right edge and calendar grid */
   --cal-grid-right: 40px;
   --cal-grid-w: 168px;
+  /* Original Pixels calendar clock uses FreePixel (not Pixeltype). */
   --cal-clock-size: 78px;
-  --cal-icon-size: 36px;
+  /* Day/Night icon ≈ 1/3 of digit height (Pixels: 13px × scale 3 ≈ 39px next to large FreePixel digits). */
+  --cal-icon-size: 44px;
+  /* Optical nudge vs FreePixel Hours ink (negative = up). */
+  --cal-icon-nudge-y: -0.05em;
   --cal-day-size: 46px;
-  --cal-month-size: 36px;
+  --cal-month-size: 48px;
   --cal-grid-font: 16px;
 }
 
@@ -106,41 +111,95 @@ body {
   display: flex;
   flex-direction: column;
   border: 2px solid var(--border);
-  background: #000;
+  background: var(--win-bg);
 }
 
 .titlebar {
+  --tb-pad: 2px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 32px;
-  padding: 0 10px;
+  padding: 0;
   background: linear-gradient(180deg, #002a7a 0%, var(--accent) 100%);
   border-bottom: 1px solid var(--border);
   font-family: "Pixeltype", monospace;
-  font-size: 22px;
   font-weight: 400;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   color: var(--text-bright);
   flex: 0 0 auto;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .titlebar .title {
+  /*
+   * Pixeltype caps ≈ 0.4375em and sit high in the em-box.
+   * Slightly smaller than 64px so ink fits; translateY equalizes top/bottom gap.
+   */
+  --title-gap: 5px;
+  font-size: 48px;
+  line-height: 1;
   font-weight: 400;
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  height: 100%;
+  margin: 0;
+  padding: 0 0 0 var(--title-gap);
+  transform: translateY(var(--title-gap));
+  box-sizing: border-box;
 }
 
+/* Long title in a narrow window — smaller size so it fits beside the close square. */
+.win-eyes .titlebar .title {
+  font-size: 36px;
+  letter-spacing: 0.04em;
+}
+
+/* Square: 2px from top/right/bottom; height stays 32px. */
 .titlebar .xbtn {
-  color: var(--base);
-  font-size: 20px;
-  font-weight: 400;
-  line-height: 1;
+  --x-size: calc(32px - (2 * var(--tb-pad)) - 1px);
+  position: relative;
+  width: var(--x-size);
+  height: var(--x-size);
+  flex: 0 0 auto;
+  margin: 0 var(--tb-pad) 0 0;
+  padding: 0;
+  background: var(--base);
+  color: transparent;
+  font-size: 0;
+  line-height: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.titlebar .xbtn::before,
+.titlebar .xbtn::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  /* 2px inset from square edges on each side. */
+  width: calc(100% - (2 * var(--tb-pad)));
+  height: 2px;
+  background: var(--text-bright);
+  transform-origin: center center;
+}
+
+.titlebar .xbtn::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.titlebar .xbtn::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
 }
 
 .body {
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
-  background: #000;
+  background: var(--win-bg);
 }
 
 .body.media {
@@ -241,24 +300,29 @@ body {
 .log-body {
   display: flex;
   flex-direction: column;
-  padding: 8px 12px 12px;
+  padding: 0;
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.22;
   letter-spacing: 0.04em;
+  overflow: hidden;
 }
 
+/* Pixels: solid under TIME/ID/TASK at logheadercolour @ 25% alpha (white → gray bar). */
 .log-head {
   display: grid;
   grid-template-columns: 100px 100px 1fr;
   gap: 8px;
   color: var(--text-bright);
   font-family: "Pixeltype", monospace;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 400;
   letter-spacing: 0.08em;
-  margin-bottom: 6px;
-  border-bottom: 1px solid rgba(0, 131, 188, 0.4);
-  padding-bottom: 2px;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 1px 12px 0;
+  background: rgba(255, 255, 255, 0.25);
+  box-sizing: border-box;
+  line-height: 1.1;
 }
 
 .log-cols {
@@ -266,34 +330,69 @@ body {
   grid-template-columns: 100px 100px 1fr;
   gap: 8px;
   flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 6px 12px 8px;
 }
 
 .log-cols pre,
-.words-grid pre,
-.numbers-grid pre {
+.words-grid pre {
   white-space: pre;
   overflow: hidden;
   color: var(--text);
   font-family: inherit;
 }
 
-.words-grid,
+.words-grid {
+  display: grid;
+  grid-template-columns: repeat(4, max-content);
+  justify-content: center;
+  align-content: center;
+  height: 100%;
+  padding: 10px 14px;
+  gap: 56px;
+  font-size: 16px;
+  line-height: 1.45;
+  letter-spacing: 0.04em;
+  overflow: hidden;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.words-grid pre {
+  text-align: center;
+  margin: 0;
+}
+
 .numbers-grid {
   display: grid;
+  grid-template-columns: repeat(3, max-content);
+  justify-content: center;
+  align-content: center;
   height: 100%;
-  padding: 12px 14px;
-  gap: 8px;
+  padding: 10px 14px;
+  gap: 22px;
   font-size: 16px;
-  line-height: 1.55;
+  line-height: 1.45;
   letter-spacing: 0.04em;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-.words-grid {
-  grid-template-columns: repeat(4, 1fr);
+.num-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: "FreePixel", monospace;
 }
 
-.numbers-grid {
-  grid-template-columns: repeat(3, 1fr);
+.num-col .num {
+  color: #ffffff;
+}
+
+/* Single highlighted row per column (1-based: col1 #7, col2 #4, col3 #8). */
+.num-col .num--hi {
+  color: var(--base);
 }
 
 .world-body {
@@ -424,15 +523,21 @@ body {
 .cal-clock {
   position: absolute;
   left: var(--cal-clock-x);
+  /*
+   * Original: H/M/S evenly stacked, slightly below vertical center
+   * (more air under the titlebar than above the bottom border).
+   */
   top: 50%;
+  bottom: auto;
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  font-family: "Pixeltype", monospace;
+  justify-content: flex-start;
+  gap: 0;
+  font-family: "FreePixel", monospace;
   font-size: var(--cal-clock-size);
-  line-height: 0.92;
-  color: var(--text);
+  line-height: 1;
+  color: var(--text-bright);
   z-index: 1;
 }
 
@@ -440,19 +545,36 @@ body {
   color: var(--base);
 }
 
+/* Same line-height on H/M/S so H→M gap matches M→S. */
+.cal-clock #calH,
+.cal-clock #calM,
+.cal-clock #calS {
+  font-size: inherit;
+  line-height: 0.74;
+  display: block;
+}
+
 .cal-clock-row {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  line-height: 0.74;
+}
+
+.cal-clock-row #calH {
+  line-height: 0.74;
 }
 
 .cal-day-icon {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: var(--cal-icon-size);
   height: var(--cal-icon-size);
   color: var(--base);
   flex: 0 0 auto;
+  transform: translateY(var(--cal-icon-nudge-y));
 }
 
 .cal-day-icon .icon-sun,
@@ -470,15 +592,16 @@ body {
   display: block;
 }
 
-/* Month keeps its place; day number shifts left so both share one right edge. */
+/* Right-anchored mid column: month grows left, gap to grid stays fixed. */
 .cal-mid {
   position: absolute;
-  left: var(--cal-mid-x);
+  left: auto;
+  right: calc(var(--cal-grid-right) + var(--cal-grid-w) + var(--cal-mid-gap));
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: center;
   width: max-content;
   z-index: 1;
@@ -491,7 +614,6 @@ body {
   line-height: 1;
   letter-spacing: 0.04em;
   color: var(--base);
-  align-self: flex-end;
   margin-bottom: 6px;
 }
 

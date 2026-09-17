@@ -26,7 +26,7 @@
             <div class="cal-clock-row">
               <span id="calH">00</span>
               <span class="cal-day-icon" id="calDayIcon" title="day" aria-hidden="true">
-                <svg class="icon-sun" viewBox="0 0 16 16" width="36" height="36" aria-hidden="true">
+                <svg class="icon-sun" viewBox="0 0 16 16" aria-hidden="true">
                   <circle cx="8" cy="8" r="3.2" fill="currentColor"/>
                   <g stroke="currentColor" stroke-width="1.4" stroke-linecap="square">
                     <line x1="8" y1="1" x2="8" y2="3.2"/>
@@ -39,7 +39,7 @@
                     <line x1="4.6" y1="11.4" x2="3.1" y2="12.9"/>
                   </g>
                 </svg>
-                <svg class="icon-moon" viewBox="0 0 16 16" width="36" height="36" aria-hidden="true">
+                <svg class="icon-moon" viewBox="0 0 16 16" aria-hidden="true">
                   <path fill="currentColor" d="M11.2 2.1A6.2 6.2 0 0 0 2.4 10a6.2 6.2 0 0 0 8.8 3.9A5.1 5.1 0 0 1 11.2 2.1z"/>
                 </svg>
               </span>
@@ -60,15 +60,9 @@
         <div class="body log-body">
           <div class="log-head"><span>TIME</span><span>ID</span><span>TASK</span></div>
           <div class="log-cols">
-            <pre id="logTime">12:00:01
-12:00:02
-12:00:03</pre>
-            <pre id="logId">338213
-287798
-971321</pre>
-            <pre id="logTask">Service Host: DNS Client
-System Setting Broker
-Service Host: DHCP Client</pre>
+            <pre id="logTime"></pre>
+            <pre id="logId"></pre>
+            <pre id="logTask"></pre>
           </div>
         </div>
       </section>
@@ -81,33 +75,19 @@ Service Host: DHCP Client</pre>
       <section class="window win-numbers">
         <header class="titlebar"><span class="title">NUMBERS</span><span class="xbtn">×</span></header>
         <div class="body numbers-grid">
-          <pre id="num1">33058221
-93963211
-18402933</pre>
-          <pre id="num2">55201844
-70119220
-44887711</pre>
-          <pre id="num3">99100233
-12004567
-88334455</pre>
+          <div class="num-col" id="num1"></div>
+          <div class="num-col" id="num2"></div>
+          <div class="num-col" id="num3"></div>
         </div>
       </section>
 
       <section class="window win-words">
         <header class="titlebar"><span class="title">WORDS</span><span class="xbtn">×</span></header>
         <div class="body words-grid">
-          <pre id="words1">bookish
-giraffe
-athirst</pre>
-          <pre id="words2">bilious
-brittle
-luminous</pre>
-          <pre id="words3">circuit
-wired
-protocol</pre>
-          <pre id="words4">signal
-layer
-packet</pre>
+          <pre id="words1"></pre>
+          <pre id="words2"></pre>
+          <pre id="words3"></pre>
+          <pre id="words4"></pre>
         </div>
       </section>
 
@@ -145,6 +125,7 @@ packet</pre>
       <div class="scanlines" aria-hidden="true"></div>
     </div>
   </div>
+  <script src="js/words-data.js"></script>
   <script src="js/scene.js"></script>
 </body>
 </html>

@@ -16,7 +16,8 @@ Later stages (not this repo’s job yet) can turn pieces into real apps and a fu
 ## Status
 
 Wallpaper package includes the Copland layout, LAIN art/fonts, live local
-clock + calendar, and world clocks (Tokyo / NYC). No installer yet — on the
+clock + calendar, world clocks (Tokyo / NYC), and cycling fake LOG / WORDS /
+NUMBERS. No installer yet — on the
 Plasma host:
 
 ```bash
@@ -30,7 +31,7 @@ kpackagetool6 --type Plasma/Wallpaper --upgrade \
 - [x] LAIN art and pixel fonts
 - [x] Live clock and calendar
 - [x] World clocks (Tokyo / NYC)
-- [ ] Fake system log, words, and numbers
+- [x] Fake system log, words, and numbers
 - [ ] Scaling for real resolution / multi-monitor
 - [ ] Matching Plasma colors, fonts, and panel chrome
 - [ ] Install and uninstall that won’t wreck your main desktop
