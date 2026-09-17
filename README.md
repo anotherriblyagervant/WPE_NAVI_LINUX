@@ -139,7 +139,7 @@ the committed theme directory (no generator on the Plasma host).
 ## Credits
 
 Visual design and assets come from the Steam Workshop items linked above (by Gav).
-Bundled files are listed in `[docs/CREDITS.md](docs/CREDITS.md)`.
+Bundled files are listed in [docs/CREDITS.md](./docs/CREDITS.md).
 
 ## License
 
