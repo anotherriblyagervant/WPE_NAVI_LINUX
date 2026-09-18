@@ -2,7 +2,7 @@
 
 A Copland OS–inspired Plasma desktop look, based on the awesome Wallpaper Engine wallpaper
 [LAIN Navi](https://steamcommunity.com/sharedfiles/filedetails/?id=3152101588) (built on [Pixels](https://steamcommunity.com/sharedfiles/filedetails/?id=3122339805))
-made by Gav (I`ll not past direct link to his/her profile because of privacy, check the wallpaper page, but know that I`m grateful to you for good scene and inspiration).
+made by Gav (I\`ll not past direct link to his/her profile because of privacy, check the wallpaper page, but know that I`m grateful to you for good scene and inspiration).
 
 **Stage 1 goal:** the scene lives on your desktop by itself — clocks, calendar, fake system log, cycling words and numbers, LAIN art in Copland-style windows. You set it up once; you don’t click around inside the wallpaper.
 
