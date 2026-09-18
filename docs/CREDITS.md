@@ -20,6 +20,7 @@ Project-authored chrome (Apache-2.0):
 | `packages/plasma/desktoptheme/org.lainavi.copland/` | Plasma style (inherits active scheme; no duplicate colors) |
 | `packages/aurorae/themes/org.lainavi.copland/` | Aurorae window decoration (scene chrome palette; SVGs from `tools/generate-aurorae.py`) |
 | `tools/generate-aurorae.py` | Regenerates Aurorae SVG/metadata (committed outputs are what get installed) |
+| `install.sh` / `uninstall.sh` | Register/remove user configs + ensure host tools (no auto-apply of look) |
 
 Workshop items by **Gav** (see wallpaper pages for profile).  
 Pixels credits (from Workshop description) also mention assets inspired by bemuse and others used in the base scene defaults.
