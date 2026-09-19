@@ -10,7 +10,7 @@ Later stages (not this repo’s job yet) can turn pieces into real apps and a fu
 
 ## Works on
 
-- Bazzite + KDE Plasma 6 (Wayland)
+- **Bazzite** (Kinoite-style) + **KDE Plasma 6** on **Wayland**
 - Install as the Plasma user you want themed (writes only that user’s `~/.local`)
 - Missing runtime tools (e.g. Qt WebEngine) may be layered with `rpm-ostree`; Copland configs stay user-level
 - Other distros: theme packages may work by hand; the installer tool path is Bazzite/`rpm-ostree` only
