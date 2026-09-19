@@ -24,6 +24,8 @@ Later stages (not this repo’s job yet) can turn pieces into real apps and a fu
 
 ### Install / uninstall
 
+For a dedicated Plasma user so tests stay off your main desktop, see [docs/TESTING.md](./docs/TESTING.md).
+
 From the repo root on the **Plasma host** (not as root; not only inside Distrobox):
 
 ```bash
@@ -79,7 +81,7 @@ Do not hand-edit `packages/aurorae/themes/org.lainavi.copland/*.svg`. Change pal
 - [x] Matching Plasma colors, fonts, and panel chrome
 - [x] Matching Aurorae window decorations
 - [x] Install and uninstall that won’t wreck your main desktop
-- [ ] Test-account workflow (`lain_test`)
+- [x] Test-account workflow (`lain_test`)
 - [ ] Docs clear enough for someone else on Bazzite
 
 ## Credits
