@@ -220,6 +220,46 @@
   let lastCalH = "";
   let lastCalM = "";
   let lastCalS = "";
+  let resumeCooldownUntil = 0;
+  const RESUME_COOLDOWN_MS = 1500;
+
+  function bumpHeartbeat() {
+    window.__coplandBeat = Date.now();
+  }
+
+  function resyncClocks() {
+    if (tickTimer) {
+      window.clearTimeout(tickTimer);
+      tickTimer = 0;
+    }
+    const now = new Date();
+    try {
+      updateClock(now);
+    } catch (err) {
+      /* keep wallpaper visible */
+    }
+    try {
+      buildCalendar(now);
+    } catch (err) {
+      /* keep wallpaper visible */
+    }
+    try {
+      updateWorldClocks(now);
+    } catch (err) {
+      /* keep wallpaper visible */
+    }
+    bumpHeartbeat();
+    scheduleNextTick();
+  }
+
+  function resumeScene() {
+    const nowMs = Date.now();
+    if (nowMs < resumeCooldownUntil) return;
+    resumeCooldownUntil = nowMs + RESUME_COOLDOWN_MS;
+    // Catch the clock up if timers were paused. Do not restart GIFs or reshuffle
+    // LOG / WORDS / NUMBERS — that blanks a frame and jumps the scene.
+    resyncClocks();
+  }
 
   function updateClock(now) {
     if (!elH || !elM || !elS) return;
@@ -416,6 +456,7 @@
     } catch (err) {
       /* keep wallpaper visible */
     }
+    bumpHeartbeat();
   }
 
   function scheduleNextTick() {
@@ -427,12 +468,28 @@
     }, delay);
   }
 
+  function onVisibilityChange() {
+    if (document.visibilityState === "visible") {
+      resumeScene();
+    }
+  }
+
+  function onPageResume() {
+    resumeScene();
+  }
+
   initNumColumns();
   fitScene();
+  bumpHeartbeat();
   window.addEventListener("resize", onFitResize);
   if (window.visualViewport) {
     window.visualViewport.addEventListener("resize", onFitResize);
   }
+  document.addEventListener("visibilitychange", onVisibilityChange);
+  window.addEventListener("resume", onPageResume);
+  window.addEventListener("pageshow", function (ev) {
+    if (ev.persisted) resumeScene();
+  });
   tick();
   scheduleNextTick();
 })();

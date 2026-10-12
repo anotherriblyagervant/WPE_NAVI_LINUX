@@ -19,9 +19,9 @@ Later stages (not this repo’s job yet) can turn pieces into real apps and a fu
 
 | Piece | Version | What you get |
 |---|---|---|
-| Wallpaper | **1.1** | Copland layout, LAIN art/fonts, live clock + calendar, world clocks (Tokyo / NYC), fake LOG / WORDS / NUMBERS. Authored at **1920×1080**, **letterboxes** per screen (no crop). |
+| Wallpaper | **1.4** | Copland layout, LAIN art/fonts, live clock + calendar, world clocks (Tokyo / NYC), fake LOG / WORDS / NUMBERS. Authored at **1920×1080**, **letterboxes** per screen (no crop). Does not tear down the view after a game. |
 | Chrome | **1.2** | Color scheme, Plasma style, Aurorae decorations (hardcoded scene fills; inactive stays dark), Pixeltype / Free Pixel fonts |
-| Installer | **1.3** | `./install.sh` / `./uninstall.sh` — ensure tools when missing, register everything into System Settings (**no auto-apply**), remove only Copland files on uninstall |
+| Installer | **1.4** | `./install.sh` / `./uninstall.sh` — ensure tools when missing, register everything into System Settings (**no auto-apply**), run plasmashell Qt WebEngine in software mode, remove only Copland files on uninstall |
 
 ## Quick start (someone else on Bazzite)
 
@@ -93,6 +93,9 @@ After CSS/JS-only wallpaper tweaks, reselect the wallpaper if Plasma still shows
 | Symptom | What to try |
 |---|---|
 | Blank / fallback wallpaper, or “QtWebEngine” errors | Install exit was `2`, or you haven’t rebooted after `rpm-ostree` layered `qt6-qtwebengine`. Confirm the QML module exists, reboot, reselect **Copland LAIN Scene**. |
+| Scene goes black after a game | plasmashell Qt WebEngine was using Vulkan and then failed `CreateSharedImage`. Installer **1.4** forces software rendering for plasmashell only. Run `./install.sh --skip-tools`, then `systemctl --user restart plasma-plasmashell.service` on the host. You want `view created rev=1.4` and no new `CreateSharedImage failed` lines. |
+| GIFs/clocks freeze during a game or heavy load | Expected while the GPU is saturated. Software rendering avoids a permanent black desktop; smooth animation *during* the game is not guaranteed. |
+| Wallpaper goes black overnight / after sleep | If the render process dies, the wallpaper reloads it. There is no Debug mode. After install, restart Plasma or the new WebEngine flags are not applied: `systemctl --user restart plasma-plasmashell.service` in a **host** Konsole. Then `journalctl --user -u plasma-plasmashell.service -b \| grep -i "Copland scene"`. |
 | Script won’t layer packages / asks you to run `sudo` | User not in `wheel`, or no active local graphical session. Run the printed `rpm-ostree` command, reboot, then `./install.sh --skip-tools`. |
 | Ran install “inside Distrobox” and nothing showed up | Scripts must run on the **host** Plasma user. Distrobox can’t register that user’s Plasma packages the way you expect. |
 | Fonts missing from the chooser | Re-open System Settings after install. Families are **Pixeltype** and **Free Pixel** (from fontinst into `~/.local/share/fonts`). |

@@ -157,12 +157,40 @@ register_aurorae() {
   manifest_add files "$dest"
 }
 
+register_webengine_software() {
+  # Plasmashell's Qt WebEngine falls back to Vulkan when GBM is missing (NVIDIA).
+  # After a game, CreateSharedImage fails and the wallpaper stays black.
+  # Software compositing keeps the scene paintable without that GPU path.
+  # Scoped to plasma-plasmashell only, not the user's browser.
+  local dir dest
+  dir="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user/plasma-plasmashell.service.d"
+  dest="$dir/copland-webengine.conf"
+
+  log "registering plasmashell WebEngine software rendering → $dest"
+  if [[ "${COPLAND_DRY_RUN}" == "1" ]]; then
+    log "dry-run: write $dest (QTWEBENGINE_CHROMIUM_FLAGS=--disable-gpu --disable-gpu-compositing)"
+    manifest_add files "$dest"
+    return 0
+  fi
+
+  mkdir -p "$dir"
+  cat >"$dest" <<'EOF'
+[Service]
+Environment="QTWEBENGINE_CHROMIUM_FLAGS=--disable-gpu --disable-gpu-compositing"
+EOF
+  manifest_add files "$dest"
+  if command -v systemctl >/dev/null 2>&1; then
+    systemctl --user daemon-reload || warn "could not reload user systemd; restart Plasma after the next login"
+  fi
+}
+
 register_all_configs() {
   register_fonts
   register_color_scheme
   register_wallpaper
   register_plasma_style
   register_aurorae
+  register_webengine_software
 }
 
 print_settings_next_steps() {
@@ -178,6 +206,10 @@ Nothing was applied automatically. Choose in System Settings:
 
 After CSS/JS-only wallpaper tweaks, reselect the wallpaper if Plasma shows a cache.
 Prefer Aurorae v1 — SVG fills are more reliable on Plasma 6.7.
+
+Wallpaper WebEngine is set to software rendering for plasmashell only, so a game
+cannot leave a black desktop. That applies after the next Plasma start:
+  systemctl --user restart plasma-plasmashell.service
 
 Uninstall (removes Copland files only; does not remove host tools):
   ./uninstall.sh

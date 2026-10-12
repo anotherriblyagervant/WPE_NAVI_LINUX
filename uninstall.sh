@@ -142,6 +142,17 @@ while IFS= read -r path || [[ -n "$path" ]]; do
   fi
 done < <(printf '%s' "$FILES" | _manifest_uniq_lines)
 
+# Software-rendering drop-in is a systemd unit fragment. Reload after it is gone.
+_copland_dropin="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user/plasma-plasmashell.service.d/copland-webengine.conf"
+if [[ ! -e "$_copland_dropin" ]]; then
+  if [[ "${COPLAND_DRY_RUN}" == "1" ]]; then
+    log "dry-run: systemctl --user daemon-reload (drop WebEngine software-rendering override)"
+  elif command -v systemctl >/dev/null 2>&1; then
+    systemctl --user daemon-reload || true
+    log "reloaded user systemd (plasmashell WebEngine override removed; restart Plasma to apply)"
+  fi
+fi
+
 # Drop entire state dir (manifest + any rpm-ostree failure logs)
 if [[ "${COPLAND_DRY_RUN}" == "1" ]]; then
   log "dry-run: rm -rf $COPLAND_STATE_DIR"
