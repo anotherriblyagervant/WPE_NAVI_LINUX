@@ -25,6 +25,7 @@ MANIFEST_PACKAGES=""
 MANIFEST_TOOLS_INSTALLED=""
 MANIFEST_TOOLS_SKIPPED=""
 MANIFEST_TOOLS_CONFLICT=""
+MANIFEST_OPTIONS=""
 
 log()  { printf '%s\n' "$*"; }
 err()  { printf 'error: %s\n' "$*" >&2; }
@@ -90,6 +91,8 @@ write_manifest() {
     printf '%s' "$MANIFEST_TOOLS_SKIPPED" | _manifest_uniq_lines
     printf '\n[tools_conflict]\n'
     printf '%s' "$MANIFEST_TOOLS_CONFLICT" | _manifest_uniq_lines
+    printf '\n[options]\n'
+    printf '%s' "$MANIFEST_OPTIONS" | _manifest_uniq_lines
   } >"$dest"
   verbose "wrote manifest $dest"
 }

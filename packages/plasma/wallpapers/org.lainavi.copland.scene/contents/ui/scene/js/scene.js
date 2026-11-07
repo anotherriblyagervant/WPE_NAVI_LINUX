@@ -46,6 +46,31 @@
   const scene = document.getElementById("scene");
   if (!scene) return;
 
+  const rawOpts =
+    typeof window !== "undefined" && window.COPLAND_SCENE_OPTIONS
+      ? window.COPLAND_SCENE_OPTIONS
+      : {};
+  const sceneOpts = {
+    enterprise: rawOpts.enterprise === true,
+    numbers: rawOpts.numbers === true
+  };
+
+  function removeWindow(selector) {
+    const el = scene.querySelector(selector);
+    if (el && el.parentNode) el.parentNode.removeChild(el);
+  }
+
+  if (sceneOpts.enterprise) {
+    const logo = scene.querySelector(".win-eyes img[data-src]");
+    if (logo) {
+      logo.setAttribute("src", logo.getAttribute("data-src"));
+      logo.removeAttribute("data-src");
+    }
+  } else {
+    removeWindow(".win-eyes");
+  }
+  if (!sceneOpts.numbers) removeWindow(".win-numbers");
+
   const scaleRoot = document.documentElement;
   const SCENE_W = 1920;
   const SCENE_H = 1080;
@@ -103,10 +128,34 @@
   const elMonth = document.getElementById("calMonth");
   const elGrid = document.getElementById("calGrid");
 
-  // Live IANA zones (Pixels SoT). DESIGN.md listed fixed offsets for a sample locale.
+  // Live IANA zones. Defaults match Pixels SoT (Tokyo / NYC); installer may override via options.js.
+  const worldClockDefaults = [
+    { label: "TOKYO", timeZone: "Asia/Tokyo" },
+    { label: "NYC", timeZone: "America/New_York" }
+  ];
+  const worldClockOpts = Array.isArray(rawOpts.worldClocks)
+    ? rawOpts.worldClocks
+    : [];
+
+  function worldClockConfig(index) {
+    const fallback = worldClockDefaults[index] || worldClockDefaults[0];
+    const raw = worldClockOpts[index] || {};
+    const label =
+      typeof raw.label === "string" && raw.label.trim()
+        ? raw.label.trim()
+        : fallback.label;
+    const timeZone =
+      typeof raw.timeZone === "string" && raw.timeZone.trim()
+        ? raw.timeZone.trim()
+        : fallback.timeZone;
+    return { label: label, timeZone: timeZone };
+  }
+
   const worldClocks = [
     {
-      timeZone: "Asia/Tokyo",
+      cfg: worldClockConfig(0),
+      nameNode: document.getElementById("city1Name"),
+      timeNode: document.getElementById("city1Time"),
       hNode: document.getElementById("city1H"),
       minNode: document.getElementById("city1Min"),
       secNode: document.getElementById("city1Sec"),
@@ -114,7 +163,9 @@
       monthNode: document.getElementById("city1Month")
     },
     {
-      timeZone: "America/New_York",
+      cfg: worldClockConfig(1),
+      nameNode: document.getElementById("city2Name"),
+      timeNode: document.getElementById("city2Time"),
       hNode: document.getElementById("city2H"),
       minNode: document.getElementById("city2Min"),
       secNode: document.getElementById("city2Sec"),
@@ -126,15 +177,34 @@
   });
 
   worldClocks.forEach(function (c) {
-    c.fmt = new Intl.DateTimeFormat("en-US", {
-      timeZone: c.timeZone,
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hourCycle: "h23",
-      day: "2-digit",
-      month: "long"
-    });
+    c.timeZone = c.cfg.timeZone;
+    if (c.nameNode) c.nameNode.textContent = c.cfg.label;
+    if (c.timeNode) {
+      c.timeNode.setAttribute("aria-label", c.cfg.label + " time");
+    }
+    try {
+      c.fmt = new Intl.DateTimeFormat("en-US", {
+        timeZone: c.timeZone,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hourCycle: "h23",
+        day: "2-digit",
+        month: "long"
+      });
+    } catch (err) {
+      /* Invalid IANA id — fall back so the rest of the scene still runs. */
+      c.timeZone = "UTC";
+      c.fmt = new Intl.DateTimeFormat("en-US", {
+        timeZone: "UTC",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hourCycle: "h23",
+        day: "2-digit",
+        month: "long"
+      });
+    }
     c.lastHour = "";
     c.lastMin = "";
     c.lastSec = "";
@@ -174,17 +244,23 @@
   let logCount = 0;
   let logNext = 0;
 
-  const elNums = [
-    document.getElementById("num1"),
-    document.getElementById("num2"),
-    document.getElementById("num3")
-  ];
-  const numCols = NUM_COLS.map(function (col) {
-    return col.slice();
-  });
+  const numbersEnabled = sceneOpts.numbers;
+  const elNums = numbersEnabled
+    ? [
+        document.getElementById("num1"),
+        document.getElementById("num2"),
+        document.getElementById("num3")
+      ]
+    : [];
+  const numCols = numbersEnabled
+    ? NUM_COLS.map(function (col) {
+        return col.slice();
+      })
+    : [];
   const numSpans = [];
 
   function initNumColumns() {
+    if (!numbersEnabled) return;
     for (let i = 0; i < elNums.length; i++) {
       const el = elNums[i];
       const values = numCols[i];
@@ -393,6 +469,7 @@
   }
 
   function updateNumbers() {
+    if (!numbersEnabled) return;
     for (let i = 0; i < numCols.length; i++) {
       const col = numCols[i];
       const spans = numSpans[i];
@@ -477,6 +554,239 @@
   function onPageResume() {
     resumeScene();
   }
+
+  /* ---- AUDIO / MPRIS now-playing (lookalike bars; optional spectrum[] hook) ---- */
+  const elAudioIdle = document.getElementById("audioIdle");
+  const elAudioPlayer = document.getElementById("audioPlayer");
+  const elAudioTitle = document.getElementById("audioTitle");
+  const elAudioArtist = document.getElementById("audioArtist");
+  const elAudioArt = document.getElementById("audioArt");
+  const elAudioArtFallback = document.getElementById("audioArtFallback");
+  const elAudioBars = document.getElementById("audioBars");
+
+  const AUDIO_BAR_COUNT = 66;
+  const AUDIO_BAR_FPS = 18;
+  const AUDIO_BAR_SPACING = 0.3; // fraction of bar slot left empty (Simple Audio Bars-ish)
+
+  let mediaStatus = "Stopped";
+  let mediaArtUrl = "";
+  let mediaSpectrum = null;
+  let audioBarTimer = 0;
+  let audioBarLevels = new Array(AUDIO_BAR_COUNT);
+  let audioBarTargets = new Array(AUDIO_BAR_COUNT);
+  let audioBarsLive = false;
+  let audioBarColor = "";
+  let audioBarCtx = null;
+  for (let i = 0; i < AUDIO_BAR_COUNT; i++) {
+    audioBarLevels[i] = 0;
+    audioBarTargets[i] = 0;
+  }
+
+  function setHidden(el, hidden) {
+    if (!el) return;
+    if (hidden) el.setAttribute("hidden", "");
+    else el.removeAttribute("hidden");
+  }
+
+  function normalizeMediaStatus(status) {
+    const s = String(status || "Stopped").trim().toLowerCase();
+    if (s === "playing") return "Playing";
+    if (s === "paused") return "Paused";
+    return "Stopped";
+  }
+
+  function showAudioIdle() {
+    setHidden(elAudioIdle, false);
+    setHidden(elAudioPlayer, true);
+  }
+
+  function showAudioPlayer() {
+    setHidden(elAudioIdle, true);
+    setHidden(elAudioPlayer, false);
+  }
+
+  function setAlbumArt(url) {
+    const next = typeof url === "string" ? url.trim() : "";
+    if (!elAudioArt) return;
+    // Same URL already shown — skip reload/flicker.
+    if (next && next === mediaArtUrl && elAudioArt.getAttribute("src") === next) {
+      return;
+    }
+    mediaArtUrl = next;
+    if (!mediaArtUrl) {
+      elAudioArt.removeAttribute("src");
+      setHidden(elAudioArt, true);
+      setHidden(elAudioArtFallback, false);
+      return;
+    }
+    elAudioArt.onload = function () {
+      setHidden(elAudioArt, false);
+      setHidden(elAudioArtFallback, true);
+    };
+    elAudioArt.onerror = function () {
+      elAudioArt.removeAttribute("src");
+      setHidden(elAudioArt, true);
+      setHidden(elAudioArtFallback, false);
+    };
+    elAudioArt.src = mediaArtUrl;
+  }
+
+  function audioBarFillColor() {
+    if (audioBarColor) return audioBarColor;
+    audioBarColor =
+      getComputedStyle(document.documentElement).getPropertyValue("--base").trim() ||
+      "#0083bc";
+    return audioBarColor;
+  }
+
+  function paintAudioBars() {
+    if (!elAudioBars) return;
+    if (!audioBarCtx) audioBarCtx = elAudioBars.getContext("2d");
+    const ctx = audioBarCtx;
+    if (!ctx) return;
+    const w = elAudioBars.width;
+    const h = elAudioBars.height;
+    ctx.clearRect(0, 0, w, h);
+
+    const slot = w / AUDIO_BAR_COUNT;
+    const gap = slot * AUDIO_BAR_SPACING;
+    const barW = Math.max(1, slot - gap);
+    ctx.fillStyle = audioBarFillColor();
+
+    for (let i = 0; i < AUDIO_BAR_COUNT; i++) {
+      const level = Math.max(0, Math.min(1, audioBarLevels[i] || 0));
+      const barH = Math.max(level > 0.02 ? 2 : 0, Math.round(level * h * 0.92));
+      if (barH <= 0) continue;
+      const x = Math.round(i * slot + gap * 0.5);
+      ctx.fillRect(x, h - barH, Math.floor(barW), barH);
+    }
+  }
+
+  function seedAudioTargets(fromSpectrum) {
+    if (fromSpectrum && fromSpectrum.length) {
+      for (let i = 0; i < AUDIO_BAR_COUNT; i++) {
+        const src = fromSpectrum[i % fromSpectrum.length];
+        audioBarTargets[i] = Math.max(0, Math.min(1, Number(src) || 0));
+      }
+      return;
+    }
+    // Lookalike motion: smoothed pseudo-spectrum weighted toward bass bins.
+    for (let i = 0; i < AUDIO_BAR_COUNT; i++) {
+      const bass = 1 - i / (AUDIO_BAR_COUNT + 8);
+      const n = Math.random();
+      audioBarTargets[i] = Math.max(0.04, Math.min(1, n * 0.75 + bass * 0.35));
+    }
+  }
+
+  function stepAudioBars(playing) {
+    if (playing) {
+      // Real spectrum when provided; otherwise retarget lookalike motion periodically.
+      if (mediaSpectrum) seedAudioTargets(mediaSpectrum);
+      else if (Math.random() < 0.35) seedAudioTargets(null);
+      audioBarsLive = false;
+      for (let i = 0; i < AUDIO_BAR_COUNT; i++) {
+        audioBarLevels[i] += (audioBarTargets[i] - audioBarLevels[i]) * 0.28;
+        if (audioBarLevels[i] > 0.01) audioBarsLive = true;
+      }
+    } else {
+      // Paused: decay in place (freeze-ish).
+      audioBarsLive = false;
+      for (let i = 0; i < AUDIO_BAR_COUNT; i++) {
+        audioBarLevels[i] *= 0.86;
+        if (audioBarLevels[i] < 0.01) audioBarLevels[i] = 0;
+        else audioBarsLive = true;
+      }
+    }
+    paintAudioBars();
+  }
+
+  function stopAudioBarLoop() {
+    if (audioBarTimer) {
+      window.clearTimeout(audioBarTimer);
+      audioBarTimer = 0;
+    }
+  }
+
+  function clearAudioBars() {
+    for (let i = 0; i < AUDIO_BAR_COUNT; i++) audioBarLevels[i] = 0;
+    audioBarsLive = false;
+    paintAudioBars();
+  }
+
+  function scheduleAudioBarLoop() {
+    stopAudioBarLoop();
+    const playing = mediaStatus === "Playing";
+    const paused = mediaStatus === "Paused";
+    if (!playing && !paused) {
+      clearAudioBars();
+      return;
+    }
+    const tickBars = function () {
+      stepAudioBars(mediaStatus === "Playing");
+      if (mediaStatus === "Playing" || mediaStatus === "Paused") {
+        const stillMoving = mediaStatus === "Playing" || audioBarsLive;
+        if (stillMoving) {
+          audioBarTimer = window.setTimeout(tickBars, 1000 / AUDIO_BAR_FPS);
+        } else {
+          audioBarTimer = 0;
+          paintAudioBars();
+        }
+      } else {
+        audioBarTimer = 0;
+      }
+    };
+    tickBars();
+  }
+
+  function applyMediaState(state) {
+    state = state || {};
+    const prevStatus = mediaStatus;
+    mediaStatus = normalizeMediaStatus(state.status);
+    if (Array.isArray(state.spectrum)) mediaSpectrum = state.spectrum;
+    else mediaSpectrum = null;
+
+    const title = typeof state.title === "string" ? state.title : "";
+    const artist = typeof state.artist === "string" ? state.artist : "";
+    const artUrl = typeof state.artUrl === "string" ? state.artUrl : "";
+    const statusChanged = prevStatus !== mediaStatus;
+
+    if (mediaStatus === "Stopped") {
+      showAudioIdle();
+      stopAudioBarLoop();
+      clearAudioBars();
+      setAlbumArt("");
+      return;
+    }
+
+    showAudioPlayer();
+    if (elAudioTitle) elAudioTitle.textContent = title || "Unknown title";
+    if (elAudioArtist) elAudioArtist.textContent = artist || "";
+    setAlbumArt(artUrl);
+
+    // Only (re)start the bar timer on status transitions — avoids stutter on 1 Hz metadata.
+    if (statusChanged) {
+      if (mediaStatus === "Playing") seedAudioTargets(mediaSpectrum);
+      scheduleAudioBarLoop();
+    } else if (mediaStatus === "Playing" && mediaSpectrum) {
+      seedAudioTargets(mediaSpectrum);
+    }
+  }
+
+  window.__coplandSetMedia = function (state) {
+    try {
+      applyMediaState(state);
+    } catch (err) {
+      try {
+        showAudioIdle();
+      } catch (e2) {
+        /* keep wallpaper visible */
+      }
+    }
+  };
+
+  // Start idle; QML bridge pushes MPRIS when available.
+  showAudioIdle();
+  paintAudioBars();
 
   initNumColumns();
   fitScene();

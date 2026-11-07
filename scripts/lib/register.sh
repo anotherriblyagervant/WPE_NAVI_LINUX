@@ -188,6 +188,9 @@ register_all_configs() {
   register_fonts
   register_color_scheme
   register_wallpaper
+  # After kpackagetool install/upgrade, rewrite optional-window choices into the package.
+  # install.sh sources scene-options.sh before this; fail loudly if wiring is broken.
+  apply_scene_options_to_wallpaper
   register_plasma_style
   register_aurorae
   register_webengine_software
@@ -204,7 +207,8 @@ Nothing was applied automatically. Choose in System Settings:
   4. Plasma Style  → Copland LAIN
   5. Window Decorations → engine Aurorae (v1, not Aurorae 2) → theme Copland LAIN
 
-After CSS/JS-only wallpaper tweaks, reselect the wallpaper if Plasma shows a cache.
+After CSS/JS-only wallpaper tweaks, or after changing optional scene windows,
+reselect the wallpaper (or restart plasmashell) if Plasma shows a cached scene.
 Prefer Aurorae v1 — SVG fills are more reliable on Plasma 6.7.
 
 Wallpaper WebEngine is set to software rendering for plasmashell only, so a game

@@ -60,6 +60,8 @@ if [[ -z "$(printf '%s' "$FILES" | _manifest_uniq_lines)" ]]; then
   _xd="${XDG_DATA_HOME:-$HOME/.local/share}"
   FILES="${_xd}/color-schemes/CoplandLain.colors
 ${_xd}/aurorae/themes/org.lainavi.copland
+${_xd}/plasma/wallpapers/org.lainavi.copland.scene/contents/ui/scene/js/options.js
+${_xd}/copland-lain/scene-options
 "
 fi
 

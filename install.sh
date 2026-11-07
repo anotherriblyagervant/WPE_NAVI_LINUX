@@ -11,6 +11,8 @@ source "$REPO_ROOT/scripts/lib/common.sh"
 source "$REPO_ROOT/scripts/lib/tools.sh"
 # shellcheck source=scripts/lib/fonts.sh
 source "$REPO_ROOT/scripts/lib/fonts.sh"
+# shellcheck source=scripts/lib/scene-options.sh
+source "$REPO_ROOT/scripts/lib/scene-options.sh"
 # shellcheck source=scripts/lib/register.sh
 source "$REPO_ROOT/scripts/lib/register.sh"
 
@@ -23,10 +25,26 @@ in System Settings. Does not switch your active wallpaper, colors, fonts,
 Plasma style, or window decorations.
 
 Options:
-  --dry-run       Print actions without changing the system
-  -v, --verbose   Verbose logging
-  --skip-tools    Only register configs; do not check or layer host tools
-  -h, --help      Show this help
+  --dry-run              Print actions without changing the system
+  -v, --verbose          Verbose logging
+  --skip-tools           Only register configs; do not check or layer host tools
+  --with-enterprise      Include Copland OS Enterprise window in the scene
+  --without-enterprise   Omit Copland OS Enterprise window (default)
+  --with-numbers         Include NUMBERS window in the scene
+  --without-numbers      Omit NUMBERS window (default)
+  --world1=SPEC          WORLD CLOCK city 1 (preset id or IANA timezone)
+  --world2=SPEC          WORLD CLOCK city 2 (preset id or IANA timezone)
+  --world1-label=TEXT    Optional display label for city 1
+  --world2-label=TEXT    Optional display label for city 2
+  -h, --help             Show this help
+
+Optional windows default to off. WORLD CLOCK defaults to Tokyo + NYC.
+With a TTY and no matching flags, install prompts for windows and (optionally)
+world-clock cities. Window flags and world-clock flags are independent: each
+group skips only its own prompts.
+
+World SPEC may be a preset id (tokyo, nyc, kyiv, london, …), a preset label,
+or an IANA timezone (Europe/Kyiv). The same timezone may be chosen twice.
 
 Configs are always registered, even if a host tool is missing: only the
 wallpaper needs Qt WebEngine. Layering a tool needs an active local session
@@ -46,6 +64,24 @@ while [[ $# -gt 0 ]]; do
     --dry-run) COPLAND_DRY_RUN=1 ;;
     -v|--verbose) COPLAND_VERBOSE=1 ;;
     --skip-tools) COPLAND_SKIP_TOOLS=1 ;;
+    --with-enterprise) COPLAND_FLAG_ENTERPRISE=1 ;;
+    --without-enterprise) COPLAND_FLAG_ENTERPRISE=0 ;;
+    --with-numbers) COPLAND_FLAG_NUMBERS=1 ;;
+    --without-numbers) COPLAND_FLAG_NUMBERS=0 ;;
+    --world1=*) COPLAND_FLAG_WORLD1="${1#*=}" ;;
+    --world2=*) COPLAND_FLAG_WORLD2="${1#*=}" ;;
+    --world1-label=*) COPLAND_FLAG_WORLD1_LABEL="${1#*=}" ;;
+    --world2-label=*) COPLAND_FLAG_WORLD2_LABEL="${1#*=}" ;;
+    --world1|--world2|--world1-label|--world2-label)
+      [[ $# -ge 2 ]] || die "$1 requires a value (try --help)"
+      case "$1" in
+        --world1) COPLAND_FLAG_WORLD1="$2" ;;
+        --world2) COPLAND_FLAG_WORLD2="$2" ;;
+        --world1-label) COPLAND_FLAG_WORLD1_LABEL="$2" ;;
+        --world2-label) COPLAND_FLAG_WORLD2_LABEL="$2" ;;
+      esac
+      shift
+      ;;
     -h|--help) usage; exit 0 ;;
     *) die "unknown option: $1 (try --help)" ;;
   esac
@@ -67,6 +103,8 @@ log "user: $COPLAND_TARGET_USER  home: $HOME"
 
 require_plasma_tooling
 
+resolve_scene_options
+
 TOOLS_MISSING=0
 if [[ "${COPLAND_SKIP_TOOLS}" == "1" ]]; then
   log "skipping host tool checks (--skip-tools)"
@@ -75,11 +113,17 @@ else
 fi
 
 # Configs are harmless without the tools, so register them either way.
+# register_all_configs rewrites installed options.js after the wallpaper package.
 register_all_configs
+# Persist choices only after options.js was applied (or dry-run recorded).
+record_scene_options_manifest
+save_scene_options_state
 write_manifest
 
 log ""
 log "Install finished."
+log "Optional windows: Copland OS Enterprise=$COPLAND_OPT_ENTERPRISE  NUMBERS=$COPLAND_OPT_NUMBERS"
+log "World clocks: $COPLAND_OPT_WORLD1_LABEL ($COPLAND_OPT_WORLD1_TZ) / $COPLAND_OPT_WORLD2_LABEL ($COPLAND_OPT_WORLD2_TZ)"
 print_settings_next_steps
 
 if [[ -n "$(printf '%s' "$MANIFEST_TOOLS_INSTALLED" | _manifest_uniq_lines)" ]]; then

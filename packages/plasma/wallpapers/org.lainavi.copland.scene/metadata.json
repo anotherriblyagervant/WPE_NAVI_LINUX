@@ -6,12 +6,12 @@
                 "Name": "WPE_NAVI_LINUX contributors"
             }
         ],
-        "Description": "Copland OS / LAIN-inspired desktop scene (Stage 1)",
+        "Description": "Copland OS / LAIN-inspired desktop scene (Stage 2)",
         "Icon": "preferences-desktop-wallpaper",
         "Id": "org.lainavi.copland.scene",
         "License": "Apache-2.0",
         "Name": "Copland LAIN Scene",
-        "Version": "1.4",
+        "Version": "2.0",
         "Website": "https://github.com/anotherriblyagervant/WPE_NAVI_LINUX"
     },
     "X-KDE-ParentApp": "org.kde.plasmashell"

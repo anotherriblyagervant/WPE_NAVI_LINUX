@@ -7,6 +7,8 @@ import QtWebEngine
  * ?v= busts QtWebEngine cache on package upgrades.
  * A dead render process is recreated by the parent. A live page is left alone:
  * tearing the view down after a game is what turned a freeze into a black desktop.
+ *
+ * MPRIS now-playing is pushed into the page via MprisBridge → __coplandSetMedia.
  */
 Item {
     id: root
@@ -15,7 +17,7 @@ Item {
     signal recreateRequested(string reason)
     signal healthy()
 
-    readonly property string sceneRev: "1.4"
+    readonly property string sceneRev: "2.0"
     readonly property url sceneUrl: Qt.resolvedUrl("scene/index.html") + "?v=" + root.sceneRev
 
     readonly property int heartbeatIntervalMs: 20000
@@ -88,7 +90,8 @@ Item {
         backgroundColor: "#040017"
         url: root.sceneUrl
         settings.localContentCanAccessFileUrls: true
-        settings.localContentCanAccessRemoteUrls: false
+        // Album art often uses https:// or http:// mpris:artUrl values.
+        settings.localContentCanAccessRemoteUrls: true
         settings.javascriptEnabled: true
 
         Component.onCompleted: {
@@ -112,19 +115,29 @@ Item {
                 root.probeWaiting = false
                 root.ensureActiveLifecycle()
                 root.healthy()
+                // pageReady is bound into MprisBridge; force a re-push after reload.
+                mprisBridge.flush()
                 console.warn("Copland scene loaded")
                 return
             }
             if (request.status === WebEngineView.LoadFailedStatus) {
                 console.warn("Copland scene load failed:", request.errorString, request.url)
+                root.pageReady = false
                 root.recreateRequested("load failed")
             }
         }
 
         onRenderProcessTerminated: function (terminationStatus, exitCode) {
             console.warn("Copland scene render process terminated:", terminationStatus, exitCode)
+            root.pageReady = false
             root.recreateRequested("render process terminated")
         }
+    }
+
+    MprisBridge {
+        id: mprisBridge
+        webView: web
+        pageReady: root.pageReady
     }
 
     Timer {
